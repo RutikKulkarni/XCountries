@@ -17,19 +17,32 @@ const Card = ({ country }) => {
 
 const App = () => {
   const [countries, setCountries] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetch("https://restcountries.com/v3.1/all")
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! Status: ${res.status}`);
+        }
+        return res.json();
+      })
       .then((data) => setCountries(data))
-      .catch((err) => console.error("Error fetching data: ", err));
+      .catch((err) => {
+        setError(err); // Log the error to the console
+        console.error("Error fetching data: ", err);
+      });
   }, []);
 
   return (
     <div className="container">
-      {countries.map((country) => (
-        <Card key={country.cca3} country={country} />
-      ))}
+      {error ? (
+        <div className="error-message">Error loading data from the API</div>
+      ) : (
+        countries.map((country) => (
+          <Card key={country.cca3} country={country} />
+        ))
+      )}
     </div>
   );
 };
